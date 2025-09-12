@@ -109,7 +109,7 @@ qemu-system-i386 \
   -drive file=game.vhd,format=raw,index=1
 
 # Copy from D: to C:
-xcopy /s /e d:\\somegame c:\\somegame
+xcopy /s /e d:\somegame c:\somegame
 ```
 
 ## Troubleshooting
