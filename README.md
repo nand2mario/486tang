@@ -79,12 +79,12 @@ To create the MicroSD card:
 - Open the “SD Card Creator” tab and provide:
   - `boot0.rom` (BIOS)
   - `boot1.rom` (VGA BIOS)
-  - Your DOS `.vhd` disk image (for example, this [MS-DOS 6.22 image](https://github.com/nand2mario/486tang/releases/download/v0.1/dos6_256mb.vhd.zip)).
-- Write the generated image to your MicroSD card with a tool like [balenaEtcher](https://etcher.balena.io/).
+  - Your DOS `.vhd` virtual disk (for example, this [MS-DOS 6.22 disk](https://github.com/nand2mario/486tang/releases/download/v0.1/dos6_256mb.vhd.zip)).
+- Write the generated sd image to your MicroSD card with a tool like [balenaEtcher](https://etcher.balena.io/).
 
-To create a DOS disk from scratch:
+To create a DOS virtual disk from scratch:
 ```bash
-# Create an empty 256MB VHD
+# Create an empty 256MB VHD (can also be done in the toolbox)
 dd if=/dev/zero of=dos6_256mb.vhd bs=1m count=256
 
 # Install MS-DOS into the VHD using QEMU
