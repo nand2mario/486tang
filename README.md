@@ -25,7 +25,7 @@
 <p align="center"><sub>Prince of Persia</sub></p>
 </td>
 <td width="33%">
-<a href="doc/prince_of_persia2.jpg"><img src="doc/prince_of_persia2.jpg" alt="Prince of Persia 2" width="100%"></a>
+<a href="doc/prince_of_persia2.jpg"><img src="doc/prince_of_persia2.jpg" alt="Prince of Persia" width="100%"></a>
 <p align="center"><sub>Prince of Persia 2</sub></p>
 </td>
 <td width="33%">
