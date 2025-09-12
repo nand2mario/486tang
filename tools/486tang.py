@@ -510,8 +510,6 @@ def run_gui():
         port = auto_detect_port()
         if port:
             port_var.set(port)
-        else:
-            messagebox.showwarning("No Port", "No serial port found")
     
     ttk.Button(port_frame, text="Auto Detect", command=auto_detect).pack(side='left', padx=5)
     
@@ -827,8 +825,6 @@ def main():
         port = auto_detect_port()
         if port:
             print(f'Using serial port: {port}', file=sys.stderr)
-        else:
-            parser.error('No --port provided and auto-detect failed (looking for /dev/tty.usbserial* on macOS)')
 
     if baud is None:
         baud = 115200
