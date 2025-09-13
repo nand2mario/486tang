@@ -1,4 +1,4 @@
-# 486Tang — 80486 on the Tang Console 138K
+# 486Tang - 486 on a credit-card-sized FPGA board
 
 486Tang brings the classic 486 PC experience to Sipeed’s Tang Console 138K by porting the excellent [ao486-MiSTer](https://github.com/MiSTer-devel/ao486_MiSTer) core. It implements a 486SX-class system with VGA graphics, Sound Blaster audio, IDE storage, and solid DOS compatibility — all on your FPGA.
 
