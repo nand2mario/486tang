@@ -51,6 +51,8 @@
 </tr>
 </table>
 
+**My [blog post](https://nand2mario.github.io/posts/2025/486tang_486_on_a_credit_card_size_fpga_board/) about the porting process of 486Tang**.
+
 ## Quick Start
 
 ### What you need
