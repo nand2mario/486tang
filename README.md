@@ -56,8 +56,8 @@
 ### What you need
 - Tang Console 138K
 - MicroSD card
-- HDMI display (720p)
-- A PC or Mac for the toolbox
+- HDMI display
+- A PC or Mac for the toolbox app
 
 ### 1) Download
 Grab the latest release: https://github.com/nand2mario/486tang/releases and unzip it. You’ll find:
