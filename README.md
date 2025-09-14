@@ -13,7 +13,7 @@
 - Sound Blaster 16–compatible audio with OPL3 FM
 - IDE/ATA controller supporting disks up to 8GB
 - PS/2 keyboard and mouse emulation via host PC/Mac
-- [Compact and throughtfully-design](doc/tangconsole.jpeg) board
+- [Compact and throughtfully-designed](doc/tangconsole.jpeg) board
 
 ## Gallery
 
