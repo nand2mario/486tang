@@ -1,12 +1,11 @@
 // VGA video and sound to HDMI converter with DDR3 framebuffer
 // nand2mario, 9/2025
-
 module ao486_to_hdmi (
-    input               clk27,         // 27Mhz for generating HDMI and DDR3 clocks
+    input               clk27,            // 27Mhz for generating HDMI and DDR3 clocks
     input               pll_lock_27,
     input               clk50,
 	input               resetn,
-    output              clk_pixel,    // 74.25Mhz pixel clock output
+    output              clk_pixel,        // 74.25Mhz pixel clock output
     input         [5:0] ddr_prefetch_delay,
     output              init_calib_complete,
 
@@ -19,7 +18,7 @@ module ao486_to_hdmi (
     input               vga_hs,
     input               vga_vs,
     input               vga_de,           // blank_n
-    input               freeze,        // freeze video output (for debug)
+    input               freeze,           // freeze video output (for debug)
 
     // audio input
     input        [15:0] sound_left,

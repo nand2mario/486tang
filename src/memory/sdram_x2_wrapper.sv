@@ -1,18 +1,13 @@
-// sdram_x2_wrapper: run SDRAM core at 2x clk_sys while keeping system at clk_sys
+// sdram_x2_wrapper: run SDRAM core at 2x clk_sys
 //
 // Notes
 // - This wrapper assumes clk_2x = 2 * clk_sys and both clocks are phase-aligned
 //   from the same PLL, so a clk_sys rising edge coincides with every other clk_2x edge.
-// - Inputs from clk_sys domain are stable for a full sys cycle, so the 2x core can
-//   sample them directly. Outputs that are pulses in the 2x domain are converted to
-//   toggle events and stretched to at least one clk_sys cycle.
-// - Level signals (busy/ack) are sampled on clk_sys edges for safe consumption.
-
-module sdram_x2_wrapper
-#(
+// - Inputs from clk_sys domain are sampled by the 2x core on clk_sys edges for safety. 
+// - Outputs that are pulses in the 2x domain are stretched to at least one clk_sys cycle.
+module sdram_x2_wrapper #(
     parameter FREQ_SYS = 20_000_000
-)
-(
+) (
     // Clocks/reset
     input             clk_sys,       // main logic clock (e.g. 20 MHz)
     input             clk_2x,        // SDRAM engine clock (e.g. 40 MHz)

@@ -1,4 +1,4 @@
-// Main memory mux - most accesses go to DDR3, VGA accesses go to vga module.
+// Main memory mux - most accesses go to SDRAM, VGA accesses go to vga module.
 // nand2mario, 7/2025
 module main_memory (
     input             clk,
@@ -13,7 +13,7 @@ module main_memory (
     input             cpu_rd,
     input             cpu_we,
 
-    // Memory interface - goes to DDR3 or SDRAM
+    // Memory interface - goes to SDRAM
     output     [31:0] mem_addr,
     output     [31:0] mem_din,
     input      [31:0] mem_dout,

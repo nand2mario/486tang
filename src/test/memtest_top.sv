@@ -1,4 +1,4 @@
-// Top-level test wrapper for main_memory + mem_backend_sim
+// Top-level test wrapper for main_memory + sdram_sim
 module memtest_top (
     input             clk,
     input             reset,

@@ -237,8 +237,7 @@ system #(.SYS_FREQ(SYS_FREQ)) system (
 
 reg  [16:0] spk_out;
 
-synchronizer speaker_out_sync
-(
+synchronizer speaker_out_sync (
 	.clk(clk_audio),
 	.in(speaker_out),
 	.out(speaker_out_clk_audio)
@@ -255,12 +254,18 @@ always @(posedge clk_audio) begin
 end
 
 uart2ps2 #(.CLK_FREQ(SYS_FREQ), .BAUD(115200)) u_uart2ps2 (
-    .clk(clk_sys), .resetn(~reset),
-    .uart_rx(UART_RXD), .uart_tx(UART_TXD),
-    .kbd_data(uart_kbd_data), .kbd_we(uart_kbd_we),
-    .mouse_data(uart_mouse_data), .mouse_we(uart_mouse_we),
-    .mouse_host_cmd(mouse_host_cmd), .mouse_host_cmd_rd(mouse_host_cmd_rd),
-    .dbg_byte(dbg_uart_byte), .dbg_we(dbg_uart_we)
+    .clk(clk_sys), 
+    .resetn(~reset),
+    .uart_rx(UART_RXD), 
+    .uart_tx(UART_TXD),
+    .kbd_data(uart_kbd_data), 
+    .kbd_we(uart_kbd_we),
+    .mouse_data(uart_mouse_data), 
+    .mouse_we(uart_mouse_we),
+    .mouse_host_cmd(mouse_host_cmd), 
+    .mouse_host_cmd_rd(mouse_host_cmd_rd),
+    .dbg_byte(dbg_uart_byte), 
+    .dbg_we(dbg_uart_we)
 );
 
 // HDMI output

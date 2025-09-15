@@ -1,3 +1,5 @@
+// Not used by memtest_top anymore.
+// 
 // Simple memory backend model for main_memory.sv interface
 // - 32-bit data, byte enables
 // - Supports single and burst reads; single and burst writes (treated per-cycle)

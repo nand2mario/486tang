@@ -1,3 +1,9 @@
+# SD card image created with ../tools/mksdcard.py
+SDCARD = sdcard_debug.img
+
+#------------------------------------------------------------------------------
+# No user changes needed below this line
+#------------------------------------------------------------------------------
 VERILATOR = verilator
 CFLAGS_SDL=$(shell sdl2-config --cflags) -g -O2 -std=c++17
 LIBS_SDL=$(shell sdl2-config --libs) -g
@@ -42,25 +48,17 @@ SOURCES = $D/system.sv $D/ao486/ao486.v $D/ao486/exception.v $D/ao486/global_reg
 CPP_SOURCES = main.cpp
 
 # Default target
-all: obj_dir/Vsystem dos6.vhd
+all: obj_dir/Vsystem
 
 # Generate Verilator files and build
 obj_dir/Vsystem: $(SOURCES) $(CPP_SOURCES)
 	$(VERILATOR) $(VERILATOR_FLAGS) $(VERILATOR_INCLUDE) $(VERILATOR_OPT) $(SOURCES) $(CPP_SOURCES) 
-
-dos6.vhd: dos6.vhd.gz
-	gunzip -k dos6.vhd.gz
 
 # Clean generated filesx2
 clean:
 	rm -rf obj_dir
 	rm -f *.o *.d sim_cache
 
-SDCARD = sdcard_debug.img
-
-# msdos622.vhd is hard-coded in driver_sd_sim.v
-# ./obj_dir/Vsystem -s 39000000 -e 44000000 boot0.rom boot1.rom dos6.vhd
-#./obj_dir/Vsystem --trace -s 0 -e 10000000 boot0.rom boot1.rom dos6.vhd
 boot: obj_dir/Vsystem $(SDCARD)
 	./obj_dir/Vsystem --vga --trace -s 0 -e 3000000 $(SDCARD)
 

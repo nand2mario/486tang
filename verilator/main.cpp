@@ -550,9 +550,9 @@ int main(int argc, char** argv) {
     tb.reset = 1;
     full_step();
 
+    // CMOS and IDE init are now done in system.sv
     // set amount of extended memory and date / time
     // init_cmos();
-
     // set HDD geometry and other parameters
     // init_ide(disk_file.c_str(), 256*512);    // Hard disk MBR is at sector 256 
 
