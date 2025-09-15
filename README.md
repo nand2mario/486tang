@@ -154,10 +154,6 @@ From bottom to top (LED[0] → LED[7]):
 
 - ao486-MiSTer team — original 486 implementation
 
-## License
-
-486Tang is based on ao486-MiSTer and follows its open-source licensing. See individual source files for details.
-
 —
 
 Enjoy authentic 486 PC computing on Tang FPGAs!
