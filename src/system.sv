@@ -343,7 +343,7 @@ ao486 ao486 (
 
 // Main memory access through SDRAM/DDR and VGA memory hole
 
-wire is_rom = avm_address[29:14] == 16'hC || avm_address[29:14] == 16'hF;
+wire is_rom = avm_address[29:16] == 14'h3;
 
 main_memory main_memory (
     .clk               (clk_sys),

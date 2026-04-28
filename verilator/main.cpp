@@ -53,6 +53,7 @@ bool trace_ide = false;
 bool trace_post = false;
 bool trace_sound = false;
 bool trace_symbols = false;
+bool trace_uma = false;
 bool record_audio = false;
 string symbols_file;
 map<uint32_t, string> symbols;
@@ -67,6 +68,11 @@ uint16_t ignore_mask = 0xf400;      // 15:12
 int ignore_memory = 0;
 set<uint32_t> watch_memory;         // dword addresses
 bool mem_write_r = 0;
+bool mem_read_r = 0;
+bool mem_readdatavalid_r = 0;
+bool uma_read_pending = false;
+uint32_t uma_read_addr = 0;
+uint8_t uma_read_be = 0;
 uint32_t eip_r = 0;
 unsigned int disk_size = 0;
 static FILE* disk_fp = nullptr;
@@ -281,6 +287,43 @@ void print_vga_trace() {
     // }
 }
 
+static bool is_uma_probe_addr(uint32_t byte_addr) {
+    return byte_addr >= 0x000C8000 && byte_addr < 0x000F0000;
+}
+
+void print_uma_trace() {
+    uint32_t byte_addr = tb.system->avm_address << 2;
+    bool in_range = is_uma_probe_addr(byte_addr);
+    uint32_t cs = tb.system->ao486->pipeline_inst->cs;
+    uint32_t eip = tb.system->ao486->exe_eip;
+    uint32_t cr0_pg = tb.system->ao486->pipeline_inst->__PVT__cr0_pg;
+
+    if (trace_uma && tb.system->avm_write && !mem_write_r && in_range) {
+        printf("%8lld: UMA_WR  phys=%05x be=%x data=%08x PG=%u CS:EIP=%04x:%08x\n",
+               sim_time, byte_addr, tb.system->avm_byteenable,
+               tb.system->avm_writedata, cr0_pg, cs, eip);
+    }
+
+    if (trace_uma && tb.system->__PVT__avm_read && !mem_read_r && in_range) {
+        uma_read_pending = true;
+        uma_read_addr = byte_addr;
+        uma_read_be = tb.system->avm_byteenable;
+        printf("%8lld: UMA_RD  phys=%05x be=%x PG=%u CS:EIP=%04x:%08x\n",
+               sim_time, byte_addr, tb.system->avm_byteenable, cr0_pg, cs, eip);
+    }
+
+    if (trace_uma && tb.system->__PVT__avm_readdatavalid && !mem_readdatavalid_r && uma_read_pending) {
+        printf("%8lld: UMA_RET phys=%05x be=%x data=%08x PG=%u CS:EIP=%04x:%08x\n",
+               sim_time, uma_read_addr, uma_read_be, tb.system->avm_readdata,
+               cr0_pg, cs, eip);
+        uma_read_pending = false;
+    }
+
+    mem_write_r = tb.system->avm_write;
+    mem_read_r = tb.system->__PVT__avm_read;
+    mem_readdatavalid_r = tb.system->__PVT__avm_readdatavalid;
+}
+
 void print_symbol_trace() {
     if (trace_symbols && tb.system->ao486->exe_eip != eip_r) {
         eip_r = tb.system->ao486->exe_eip;
@@ -401,6 +444,7 @@ void usage() {
     printf("  --vga     print VGA related operations\n");
     printf("  --ide     print ATA/IDE related operations\n");
     printf("  --sound   print Sound Blaster related operations\n");
+    printf("  --uma     print CPU reads/writes in 0xC8000-0xEFFFF\n");
     printf("  --record  record DSP audio output to dsp.wav\n");
     printf("  --post    print POST codes\n");
     printf("  --mem <addr> watch memory location\n");
@@ -479,6 +523,8 @@ int main(int argc, char** argv) {
             trace_ide = true;
         } else if (arg == "--sound") {
             trace_sound = true;
+        } else if (arg == "--uma") {
+            trace_uma = true;
         } else if (arg == "--record") {
             record_audio = true;
         } else if (arg == "--mem") {
@@ -603,6 +649,10 @@ int main(int argc, char** argv) {
 
         if (trace_vga)
             print_vga_trace();
+
+        if (trace_uma) {
+            print_uma_trace();
+        }
 
         if (trace_symbols) {
             print_symbol_trace();
