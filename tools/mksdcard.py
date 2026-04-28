@@ -21,6 +21,7 @@ VGA_BIOS_OFFSET = 64 * 1024   # 64KB -> sectors 128..191
 CFG_SECTOR = 192              # sector 192 (right after VGA BIOS)
 CFG_OFFSET = CFG_SECTOR * SECTOR_SIZE
 HDD_OFFSET = 128 * 1024       # 128KB -> sector 256
+HDD_SECTOR = HDD_OFFSET // SECTOR_SIZE
 
 
 def decode_chs(head, sec_cyl, cyl_lo):
@@ -185,12 +186,13 @@ def build_config_stream(mem_kb: int, hdd_path: str) -> bytes:
         f.seek(0, os.SEEK_END)
         total_bytes = f.tell()
     cyl, heads, spt = calc_geometry_from_mbr(mbr, total_bytes)
-    # 0xF001..0xF005 per ide.cpp
+    # 0xF001..0xF006 per ide.cpp
     pairs.append((0xF001, cyl))
     pairs.append((0xF002, heads))
     pairs.append((0xF003, spt))
     pairs.append((0xF004, spt * heads))
     pairs.append((0xF005, spt * heads * cyl))
+    pairs.append((0xF006, HDD_SECTOR))
 
     # Append IDENTIFY contents as 128 writes to 0xF000
     ident = build_identify_words(cyl, heads, spt)

@@ -1091,13 +1091,15 @@ always @(posedge clk_sys) begin
                 boot_sd_avs_write <= 1;
                 boot_state <= BOOT_LOAD_SECTOR;
 
-                // reset config parser at start of config phase
-                if (boot_phase == 2) begin
+                // Reset the config parser once, before the first config sector.
+                // The config stream spans sectors 192..194 and must be parsed
+                // continuously across sector boundaries.
+                if (boot_phase == 2 && boot_sectors == 16'd3) begin
                     cfg_expect_addr <= 1;
                     cfg_terminated <= 0;
                     mgmt_address <= 16'd0;
                     cfg_write_count <= 0;
-                    $display("CFG: Start parsing config at sector 192 (3 sectors)");
+                    $display("CFG: Start parsing config from sectors 192-194");
                 end
             end
             

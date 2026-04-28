@@ -341,8 +341,8 @@ always @(posedge clk or negedge rst_n) begin
     else if(io_write && io_address == 14)  disable_irq <= io_writedata[1];
 end
 
-wire sw_reset_start = io_address == 14 && io_writedata[2] && ~(drive_select);
-wire sw_reset_end   = io_address == 14 && ~io_writedata[2] && reset_in_progress;
+wire sw_reset_start = io_write && io_address == 14 && io_writedata[2] && ~(drive_select);
+wire sw_reset_end   = io_write && io_address == 14 && ~io_writedata[2] && reset_in_progress;
 
 reg reset_in_progress;
 always @(posedge clk) begin
