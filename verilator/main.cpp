@@ -17,6 +17,7 @@
 #include <svdpi.h>
 #include <fstream>
 #include <iostream>
+#include <deque>
 #include <set>
 #include <map>
 #include <vector>
@@ -28,6 +29,8 @@
 #include "wav_writer.h"
 
 using namespace std;
+
+static bool pending_mouse_arg = false;
 
 const int H_RES = 720;    // VGA text mode is 720x400
 const int V_RES = 480;    // graphics mode is max 640x480
@@ -47,6 +50,7 @@ typedef struct Pixel
 Pixel screenbuffer[H_RES * V_RES];
 
 bool trace_toggle = false;
+bool trace_requested = false;
 void set_trace(bool toggle);
 bool trace_vga = false;
 bool trace_ide = false;
@@ -437,8 +441,9 @@ void bios_printf(const string fmt, uint32_t sp, uint32_t ds, uint32_t ss) {
 }
 
 void usage() {
-    printf("\nUsage: Vsystem [--trace] [--headless] [-s T0] [-e T1] <sdcard.img>\n");
-    printf("  -s T0     start tracing at time T0\n");
+    printf("\nUsage: Vsystem [--trace] [--trace-start T0] [--headless] [-s T0] [-e T1] <sdcard.img>\n");
+    printf("  -s T0, --trace-start T0\n");
+    printf("            start tracing at time T0\n");
     printf("  -e T1     stop simulation at time T1\n");
     printf("  --trace   start trace immediately\n");
     printf("  --vga     print VGA related operations\n");
@@ -507,12 +512,13 @@ int main(int argc, char** argv) {
 
     for (int i = 1; i < argc; i++) {
         string arg(argv[i]);
-        if (arg == "-s") {
-            start_time = atoi(argv[++i]);
+        if (arg == "-s" || arg == "--trace-start") {
+            start_time = strtoull(argv[++i], nullptr, 0);
+            trace_requested = true;
         } else if (arg == "-e") {
-            stop_time = atoi(argv[++i]);
+            stop_time = strtoull(argv[++i], nullptr, 0);
         } else if (arg == "--trace") {
-            set_trace(true);
+            trace_requested = true;
         } else if (arg == "--headless") {
             g_headless = true;
         } else if (arg == "--vga") {
@@ -541,6 +547,10 @@ int main(int argc, char** argv) {
             disk_file = argv[i];
             break;
         }
+    }
+
+    if (trace_requested && start_time == UINT64_MAX) {
+        set_trace(true);
     }
     
     if (disk_file.empty()) {
@@ -624,9 +634,11 @@ int main(int argc, char** argv) {
     bool speaker_active = false;
 
     bool post_need_newline = false;
-    int pix_cnt = 0;
+	int pix_cnt = 0;
 	vector<uint8_t> scancode;   // scancode
+	deque<uint8_t> mouse_reply; // PS/2 mouse response bytes
 	uint64_t last_scancode_time;
+	uint64_t last_mouse_time = 0;
     SDL_Keycode last_key = 0;
 
     while (sim_time < stop_time) {
@@ -875,6 +887,16 @@ int main(int argc, char** argv) {
                 tb.kbd_data_valid = 0;
             }
 
+            if (sim_time - last_mouse_time > 1e5 && !mouse_reply.empty()) {
+                printf("%8lld: Sending mouse byte %d\n", sim_time, mouse_reply.front());
+                last_mouse_time = sim_time;
+                tb.mouse_data = mouse_reply.front();
+                tb.mouse_data_valid = 1;
+                mouse_reply.pop_front();
+            } else {
+                tb.mouse_data_valid = 0;
+            }
+
             if (tb.kbd_host_data & 0x100) {
                 uint8_t cmd = tb.kbd_host_data & 0xff;
                 printf("%8lld: Received keyboard command %d\n", sim_time, cmd);
@@ -891,6 +913,53 @@ int main(int argc, char** argv) {
                 }
             } else if (tb.kbd_host_data_clear) {
                 tb.kbd_host_data_clear = 0;
+            }
+
+            if (tb.mouse_host_cmd & 0x100) {
+                uint8_t cmd = tb.mouse_host_cmd & 0xff;
+                printf("%8lld: Received mouse command %02x\n", sim_time, cmd);
+                tb.mouse_host_cmd_clear = 1;
+
+                if (pending_mouse_arg) {
+                    mouse_reply.push_back(0xFA);
+                    pending_mouse_arg = false;
+                } else {
+                    switch (cmd) {
+                    case 0xFF: // Reset: ACK, BAT OK, standard PS/2 mouse ID.
+                        mouse_reply.push_back(0xFA);
+                        mouse_reply.push_back(0xAA);
+                        mouse_reply.push_back(0x00);
+                        break;
+                    case 0xF2: // Identify.
+                        mouse_reply.push_back(0xFA);
+                        mouse_reply.push_back(0x00);
+                        break;
+                    case 0xE9: // Status request.
+                        mouse_reply.push_back(0xFA);
+                        mouse_reply.push_back(0x00);
+                        mouse_reply.push_back(0x02);
+                        mouse_reply.push_back(0x64);
+                        break;
+                    case 0xEB: // Read data: neutral packet.
+                        mouse_reply.push_back(0xFA);
+                        mouse_reply.push_back(0x08);
+                        mouse_reply.push_back(0x00);
+                        mouse_reply.push_back(0x00);
+                        break;
+                    case 0xE8: // Set resolution, consumes one parameter.
+                    case 0xF3: // Set sample rate, consumes one parameter.
+                        mouse_reply.push_back(0xFA);
+                        pending_mouse_arg = true;
+                        break;
+                    default:
+                        mouse_reply.push_back(0xFA);
+                        break;
+                    }
+                }
+
+                last_mouse_time = sim_time;
+            } else if (tb.mouse_host_cmd_clear) {
+                tb.mouse_host_cmd_clear = 0;
             }
 
         }
