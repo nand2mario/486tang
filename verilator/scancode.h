@@ -145,3 +145,18 @@ map<SDL_Keycode, pair<vector<uint8_t>, vector<uint8_t>>> ps2scancodes = {
 	// {SDLK_POWER, {{0xcc}, {0xf0, 0xcc}}},
 	// {SDLK_EURO, {{0xcd}, {0xf0, 0xcd}}}
 };
+
+// SDL_Keycode is layout/text translated. On macOS some punctuation keys can
+// arrive with layout-specific keycodes, so keep a physical-key fallback for the
+// US punctuation cluster used by DOS keyboard input.
+map<SDL_Scancode, pair<vector<uint8_t>, vector<uint8_t>>> ps2scancodes_by_scancode = {
+	{SDL_SCANCODE_GRAVE, {{0x0e}, {0xf0, 0x0e}}},          // ` ~
+	{SDL_SCANCODE_COMMA, {{0x41}, {0xf0, 0x41}}},          // , <
+	{SDL_SCANCODE_PERIOD, {{0x49}, {0xf0, 0x49}}},         // . >
+	{SDL_SCANCODE_SEMICOLON, {{0x4c}, {0xf0, 0x4c}}},     // ; :
+	{SDL_SCANCODE_APOSTROPHE, {{0x52}, {0xf0, 0x52}}},    // ' "
+	{SDL_SCANCODE_LEFTBRACKET, {{0x54}, {0xf0, 0x54}}},   // [ {
+	{SDL_SCANCODE_RIGHTBRACKET, {{0x5b}, {0xf0, 0x5b}}},  // ] }
+	{SDL_SCANCODE_BACKSLASH, {{0x5d}, {0xf0, 0x5d}}},     // \ |
+	{SDL_SCANCODE_SLASH, {{0x4a}, {0xf0, 0x4a}}}          // / ?
+};

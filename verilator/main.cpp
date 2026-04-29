@@ -102,10 +102,10 @@ void step() {
     // tb.clk_sys = !tb.clk_sys;
     // tb.clk_vga = tb.clk_sys;
     tb.clk_vga = !tb.clk_vga;                   // clk_vga is 50Mhz
+    tb.clk_sys = !tb.clk_sys;                   // clk_sys is 50Mhz
+    posedge = tb.clk_sys;
     if (tb.clk_vga) {
-        tb.clk_sys = !tb.clk_sys;               // clk_sys is 25Mhz
-        posedge = tb.clk_sys;
-        tb.clk_audio = tb.clk_sys;              // should be 24.576Mhz, 25Mhz is close enough
+        tb.clk_audio = !tb.clk_audio;           // should be 24.576Mhz, 25Mhz is close enough
     }
     tb.eval();
     sim_time++;
@@ -593,7 +593,7 @@ int main(int argc, char** argv) {
         printf("Recording DSP output to dsp.wav at %d Hz\n", AUDIO_SAMPLE_RATE);
     }
 
-    tb.clock_rate = 25000000;            // for time keeping of timer, RTC and floppy
+    tb.clock_rate = 50000000;            // for time keeping of timer, RTC and floppy
     tb.clock_rate_vga = 50000000;        // >= max VGA pixel clock (28.3Mhz)
     ensure_posedge();
     // reset whole system
@@ -831,9 +831,15 @@ int main(int argc, char** argv) {
                         }
                     } else {
                         last_key = e.key.keysym.sym;
-                        printf("Key pressed: %d\n", e.key.keysym.sym);
-                        if (ps2scancodes.find(e.key.keysym.sym) != ps2scancodes.end()) {
-                            scancode.insert(scancode.end(), ps2scancodes[e.key.keysym.sym].first.begin(), ps2scancodes[e.key.keysym.sym].first.end());
+                        printf("Key pressed: %d scancode: %d\n", e.key.keysym.sym, e.key.keysym.scancode);
+                        auto key_it = ps2scancodes.find(e.key.keysym.sym);
+                        if (key_it != ps2scancodes.end()) {
+                            scancode.insert(scancode.end(), key_it->second.first.begin(), key_it->second.first.end());
+                        } else {
+                            auto scan_it = ps2scancodes_by_scancode.find(e.key.keysym.scancode);
+                            if (scan_it != ps2scancodes_by_scancode.end()) {
+                                scancode.insert(scancode.end(), scan_it->second.first.begin(), scan_it->second.first.end());
+                            }
                         }
                     }
                 }
@@ -842,9 +848,15 @@ int main(int argc, char** argv) {
                         // nothing
                     } else {
                         last_key = 0;
-                        printf("Key up: %d\n", e.key.keysym.sym);
-	    				if (ps2scancodes.find(e.key.keysym.sym) != ps2scancodes.end()) {
-		    				scancode.insert(scancode.end(), ps2scancodes[e.key.keysym.sym].second.begin(), ps2scancodes[e.key.keysym.sym].second.end());
+                        printf("Key up: %d scancode: %d\n", e.key.keysym.sym, e.key.keysym.scancode);
+                        auto key_it = ps2scancodes.find(e.key.keysym.sym);
+	    				if (key_it != ps2scancodes.end()) {
+		    				scancode.insert(scancode.end(), key_it->second.second.begin(), key_it->second.second.end());
+			    		} else {
+                            auto scan_it = ps2scancodes_by_scancode.find(e.key.keysym.scancode);
+                            if (scan_it != ps2scancodes_by_scancode.end()) {
+		    				    scancode.insert(scancode.end(), scan_it->second.second.begin(), scan_it->second.second.end());
+                            }
 			    		}
                     }
                 }
