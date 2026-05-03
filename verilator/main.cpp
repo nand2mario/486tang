@@ -17,6 +17,7 @@
 #include <svdpi.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <deque>
 #include <set>
 #include <map>
